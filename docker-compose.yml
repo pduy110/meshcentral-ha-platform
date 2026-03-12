@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+
+  meshcentral:
+    user: "1000:1000"
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: meshcentral
+    restart: unless-stopped
+
+    volumes:
+      - ./data:/opt/meshcentral/meshcentral-data
+      - ./backups:/opt/meshcentral/meshcentral-backups
+
+    ports:
+      - "443:443"
+
+    environment:
+      - NODE_ENV=production
