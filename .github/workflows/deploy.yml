@@ -30,10 +30,10 @@ jobs:
           docker push ghcr.io/${{ github.repository }}/meshcentral:latest
 
 
-      - name: Debug EC2 access
-        run: |
-          echo "EC2_HOST=${{ secrets.EC2_HOST }}"
-          nc -zv ${{ secrets.EC2_HOST }} 22
+      # - name: Debug EC2 access
+      #   run: |
+      #     echo "EC2_HOST=${{ secrets.EC2_HOST }}"
+      #     nc -zv ${{ secrets.EC2_HOST }} 22
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1
@@ -42,7 +42,9 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           timeout: 30s
-          debug: true
+          #debug: true
           script: |
-            echo connected
-            hostname
+            cd ~/meshcentral
+            docker pull ghcr.io/${{ github.repository }}/meshcentral:latest
+            docker compose down
+            docker compose up -d
