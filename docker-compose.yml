@@ -9,13 +9,23 @@ services:
       dockerfile: docker/Dockerfile
     container_name: meshcentral
     restart: unless-stopped
+    expose:
+      - "80"
 
     volumes:
       - ./data:/opt/meshcentral/meshcentral-data
       - ./backups:/opt/meshcentral/meshcentral-backups
 
-    ports:
-      - "443:443"
-
     environment:
       - NODE_ENV=production
+
+  nginx:
+    image: nginx:stable
+    container_name: meshcentral-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/meshcentral.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - meshcentral
