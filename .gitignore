@@ -1,0 +1,26 @@
+# local data
+data/
+backups/
+MYUSB/
+
+# logs
+*.log
+
+# environment variables
+.env
+
+# ssh keys
+*.pem
+*.key
+
+# macOS
+.DS_Store
+
+# vscode
+.vscode/
+
+# node
+node_modules/
+
+# docker
+*.tar

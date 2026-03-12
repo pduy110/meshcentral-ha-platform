@@ -1,0 +1,42 @@
+name: MeshCentral CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Login to GHCR
+        run: |
+          echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/meshcentral:latest -f docker/Dockerfile .
+
+      - name: Push image
+        run: |
+          docker push ghcr.io/${{ github.repository }}/meshcentral:latest
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/meshcentral-deployment
+            docker pull ghcr.io/${{ github.repository }}/meshcentral:latest
+            docker compose down
+            docker compose up -d
