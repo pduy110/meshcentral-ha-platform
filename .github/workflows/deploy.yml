@@ -36,7 +36,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/meshcentral-deployment
+            cd ~/meshcentral
             docker pull ghcr.io/${{ github.repository }}/meshcentral:latest
-            docker compose down
-            docker compose up -d
+            #docker compose down
+            #docker compose up -d
