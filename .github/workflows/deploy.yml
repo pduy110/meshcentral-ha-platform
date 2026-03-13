@@ -16,8 +16,8 @@ jobs:
     outputs:
       image_uri: ${{ steps.image_digest.outputs.image_uri }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -71,6 +71,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Copy infra config
         uses: appleboy/scp-action@v0.1.7
