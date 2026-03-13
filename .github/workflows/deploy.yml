@@ -104,6 +104,6 @@ jobs:
 
             export IMAGE_URI="${{ needs.build.outputs.image_uri }}"
 
-            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "${{ secrets.GHCR_PULL_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_PULL_USERNAME }} --password-stdin
 
             docker compose up -d --remove-orphans --force-recreate
