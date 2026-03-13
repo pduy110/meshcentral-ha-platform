@@ -31,7 +31,7 @@ jobs:
         id: image_vars
         shell: bash
         run: |
-          IMAGE_REPO="ghcr.io/${GITHUB_REPOSITORY@L}"
+          IMAGE_REPO="ghcr.io/${GITHUB_REPOSITORY@L}/meshcentral"
           IMAGE_TAG="sha-${GITHUB_SHA::7}"
           IMAGE_URI="${IMAGE_REPO}:${IMAGE_TAG}"
 
@@ -89,9 +89,7 @@ jobs:
             export SERVER_IP=$(curl -s http://checkip.amazonaws.com)
             envsubst < config/config.template.json > data/config.json
 
-            export IMAGE_REPO="ghcr.io/${{ github.repository }}"
-            export IMAGE_TAG="${{ steps.image_vars.outputs.image_tag }}"
-            export IMAGE_URI="${IMAGE_REPO}/meshcentral:${IMAGE_TAG}"
+            export IMAGE_URI="${{ steps.image_vars.outputs.image_ref }}"
 
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
