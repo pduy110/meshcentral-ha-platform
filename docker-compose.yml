@@ -1,13 +1,8 @@
-version: "3.8"
-
 services:
 
   meshcentral:
+    image: ghcr.io/${IMAGE_REPO}/meshcentral:latest
     user: "1000:1000"
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    container_name: meshcentral
     restart: unless-stopped
     expose:
       - "80"
@@ -19,9 +14,9 @@ services:
     environment:
       - NODE_ENV=production
 
+
   nginx:
     image: nginx:stable
-    container_name: meshcentral-nginx
     restart: unless-stopped
     ports:
       - "80:80"
