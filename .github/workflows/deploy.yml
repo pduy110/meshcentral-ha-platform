@@ -51,11 +51,20 @@ jobs:
           timeout: 30s
           #debug: true
           script: |
+            set -e
             cd ~/meshcentral
             mkdir -p data backups nginx
-            export IMAGE_REPO=${{ github.repository }}
+
+            if ! command -v envsubst &> /dev/null; then
+              sudo apt update
+              sudo apt install -y gettext-base
+            fi
+
+            export SERVER_IP=$(curl -s http://checkip.amazonaws.com)
+            envsubst < config/config.template.json > data/config.json
+
 
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ghcr.io/${{ github.repository }}/meshcentral:latest
-            docker compose down
-            docker compose up -d
+
+            docker compose pull
+            docker compose up -d --remove-orphans
