@@ -49,6 +49,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}         
 
       - name: Build and push image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -57,6 +58,12 @@ jobs:
           push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
+
+      - name: Compute digest image reference
+        id: image_digest
+        run: |
+          IMAGE_URI="${{ steps.image_vars.outputs.image_repo }}@${{ steps.build.outputs.digest }}"
+          echo "image_uri=${IMAGE_URI}" >> "$GITHUB_OUTPUT"
 
 
       - name: Copy infra config
@@ -89,9 +96,8 @@ jobs:
             export SERVER_IP=$(curl -s http://checkip.amazonaws.com)
             envsubst < config/config.template.json > data/config.json
 
-            export IMAGE_URI="${{ steps.image_vars.outputs.image_ref }}"
+            export IMAGE_URI="${{ steps.image_digest.outputs.image_uri }}"
 
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            docker compose pull
             docker compose up -d --remove-orphans --force-recreate
