@@ -35,6 +35,15 @@ jobs:
       #     echo "EC2_HOST=${{ secrets.EC2_HOST }}"
       #     nc -zv ${{ secrets.EC2_HOST }} 22
 
+      - name: Copy infra config
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.yml,nginx/*"
+          target: "~/meshcentral"
+
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1
         with:
@@ -45,6 +54,8 @@ jobs:
           #debug: true
           script: |
             cd ~/meshcentral
+            export IMAGE_REPO=${{ github.repository }}
+
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker pull ghcr.io/${{ github.repository }}/meshcentral:latest
             docker compose down
