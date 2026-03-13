@@ -53,7 +53,7 @@ jobs:
           script: |
             set -e
             cd ~/meshcentral
-            mkdir -p data backups nginx
+            mkdir -p data backups nginx config
 
             if ! command -v envsubst &> /dev/null; then
               sudo apt update
@@ -63,7 +63,7 @@ jobs:
             export SERVER_IP=$(curl -s http://checkip.amazonaws.com)
             envsubst < config/config.template.json > data/config.json
 
-
+            export IMAGE_REPO=${{ github.repository }}
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             docker compose pull
