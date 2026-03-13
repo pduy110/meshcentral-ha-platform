@@ -1,7 +1,7 @@
 services:
 
   meshcentral:
-    image: ghcr.io/${IMAGE_REPO}/meshcentral:latest
+    image: ${IMAGE_URI}
     user: "1000:1000"
     restart: unless-stopped
     expose:
