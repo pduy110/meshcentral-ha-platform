@@ -13,37 +13,39 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    concurrency:
+      group: meshcentral-build-${{ github.ref }}
+      cancel-in-progress: true
+
     outputs:
       image_uri: ${{ steps.image_digest.outputs.image_uri }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
 
       - name: Compute image metadata
         id: image_vars
         shell: bash
         run: |
           IMAGE_REPO="ghcr.io/${GITHUB_REPOSITORY@L}/meshcentral"
-          #IMAGE_TAG="sha-${GITHUB_SHA::7}"
-          IMAGE_URI="${IMAGE_REPO}:${IMAGE_TAG}"
 
           echo "image_repo=${IMAGE_REPO}" >> "$GITHUB_OUTPUT"
-          #echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "image_ref=${IMAGE_URI}" >> "$GITHUB_OUTPUT"
+
 
       - name: Generate Docker metadata
         id: docker_meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 # v5.6.1
         with:
           images: ${{ steps.image_vars.outputs.image_repo }}
           tags: |
@@ -52,7 +54,7 @@ jobs:
 
       - name: Build and push image
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: .
           file: ./docker/Dockerfile
@@ -60,6 +62,8 @@ jobs:
           push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Compute digest image reference
         id: image_digest
@@ -69,6 +73,11 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+
+    concurrency:
+      group: meshcentral-deploy-${{ github.ref }}
+      cancel-in-progress: false
+
     needs: build
     steps:
 
