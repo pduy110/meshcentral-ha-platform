@@ -92,7 +92,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml,nginx/*,config/*, scripts/deploy.sh"
+          source: "docker-compose.yml,nginx/*,config/*,scripts/deploy.sh"
           target: "~/meshcentral"
 
       - name: Deploy on EC2
@@ -109,10 +109,7 @@ jobs:
 
 
             IMAGE_URI="${{ needs.build.outputs.image_uri }}" \
-            SERVER_IP="$(curl -s http://checkip.amazonaws.com)" \
             GHCR_PULL_USERNAME="${{ secrets.GHCR_PULL_USERNAME }}" \
             GHCR_PULL_TOKEN="${{ secrets.GHCR_PULL_TOKEN }}" \
             PROJECT_DIR="$HOME/meshcentral" \
-
-            
             ./scripts/deploy.sh

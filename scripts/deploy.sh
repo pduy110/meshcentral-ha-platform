@@ -31,6 +31,8 @@ if [[ -n "${GHCR_PULL_USERNAME:-}" && -n "${GHCR_PULL_TOKEN:-}" ]]; then
 fi
 
 
+
+# Capture the old image, run new one, if it fails, rollback to old one
 export IMAGE_URI
 
 previous_image=""
