@@ -77,7 +77,8 @@ trap 'echo "Deployment failed" >&2; rollback' ERR
 
 docker compose up -d --remove-orphans --force-recreate
 
-if ! wait_for_health meshcentral; then
+container=$(docker compose ps -q meshcentral)
+if ! wait_for_health "$container"; then
   echo "MeshCentral failed health check after deploy: ${IMAGE_URI}" >&2
   docker compose logs --tail=100 meshcentral nginx >&2 || true
   exit 1
