@@ -80,17 +80,19 @@ jobs:
 
     needs: build
     steps:
-
       - name: Check out repository
         uses: actions/checkout@v4
 
+
+        # We need the docker-compose.yml and nginx config to deploy, but we don't need the whole repo. To optimize for speed, we can copy only the necessary files.
+        # We need these files so the server can run but feel free to modify
       - name: Copy infra config
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml,nginx/*,config/*"
+          source: "docker-compose.yml,nginx/*,config/*, scripts/deploy.sh"
           target: "~/meshcentral"
 
       - name: Deploy on EC2
@@ -99,23 +101,18 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          timeout: 30s
-          #debug: true
+          timeout: 300s
           script: |
-            set -e
+            set -euo pipefail
             cd ~/meshcentral
-            mkdir -p data backups nginx config
+            chmod +x scripts/deploy.sh
 
-            if ! command -v envsubst &> /dev/null; then
-              sudo apt update
-              sudo apt install -y gettext-base
-            fi
 
-            export SERVER_IP=$(curl -s http://checkip.amazonaws.com)
-            envsubst < config/config.template.json > data/config.json
+            IMAGE_URI="${{ needs.build.outputs.image_uri }}" \
+            SERVER_IP="$(curl -s http://checkip.amazonaws.com)" \
+            GHCR_PULL_USERNAME="${{ secrets.GHCR_PULL_USERNAME }}" \
+            GHCR_PULL_TOKEN="${{ secrets.GHCR_PULL_TOKEN }}" \
+            PROJECT_DIR="$HOME/meshcentral" \
 
-            export IMAGE_URI="${{ needs.build.outputs.image_uri }}"
-
-            echo "${{ secrets.GHCR_PULL_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_PULL_USERNAME }} --password-stdin
-
-            docker compose up -d --remove-orphans --force-recreate
+            
+            ./scripts/deploy.sh
