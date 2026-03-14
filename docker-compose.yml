@@ -1,31 +1,33 @@
 services:
-
   meshcentral:
     image: ${IMAGE_URI}
     user: "1000:1000"
     restart: unless-stopped
     expose:
       - "80"
-
     volumes:
       - ./data:/opt/meshcentral/meshcentral-data
       - ./backups:/opt/meshcentral/meshcentral-backups
 
     environment:
       - NODE_ENV=production
-
+    security_opt:
+      - no-new-privileges:true
 
   nginx:
     # Nginx version pin: 1.28.2 (stable)
     image: nginx:1.28.2@sha256:810ad1346ec7fd3d0a246c178f2b82e73a43640c691774405adfd38a751ecce8
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${NGINX_HTTP_PORT:-80}:80"
     volumes:
-      - ./nginx/meshcentral.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/meshcentral.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - meshcentral
+      meshcentral:
+        condition: service_healthy
 
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]
       interval: 30s
