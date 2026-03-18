@@ -23,13 +23,20 @@ escaped_base_image="$(
 
 # Pin the current digest from the FROM line
 current_from_line="$(
-  awk -v prefix="FROM ${BASE_IMAGE_TAG}@" '
+  awk -v prefix="FROM ${BASE_IMAGE}@" '
     index($0, prefix) == 1 {
       print
       exit
     }
   ' "$DOCKERFILE_PATH"
 )"
+# Add some debugger to help with future debug
+echo "DOCKERFILE_PATH=${DOCKERFILE_PATH}" >&2
+echo "BASE_IMAGE=${BASE_IMAGE}" >&2
+echo "BASE_IMAGE_TAG=${BASE_IMAGE_TAG}" >&2
+echo "Looking for current FROM prefix: FROM ${BASE_IMAGE}@" >&2
+echo "Dockerfile FROM lines:" >&2
+grep -n '^FROM ' "$DOCKERFILE_PATH" >&2 || true
 
 if [[ -z "$current_from_line" ]]; then
   echo "Could not find a pinned MeshCentral FROM line in ${DOCKERFILE_PATH}" >&2
@@ -45,6 +52,12 @@ current_digest="${current_from_line##*@}"
 
 # Find the latest digest for the base image from the registry
 inspect_output="$(docker buildx imagetools inspect "$BASE_IMAGE_TAG")"
+
+# Add some debugger to help with future debug
+echo "Inspecting upstream ref: ${BASE_IMAGE_TAG}" >&2
+echo "Resolved inspect output:" >&2
+printf '%s\n' "$inspect_output" >&2
+
 latest_digest="$(
   printf '%s\n' "$inspect_output" | awk '
     $1 == "Digest:" {
@@ -58,6 +71,10 @@ if ! printf '%s\n' "$latest_digest" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
   echo "Unable to determine the upstream digest for ${BASE_IMAGE_TAG}" >&2
   exit 1
 fi
+
+# Add some debugger to help with future debug
+echo "Current digest: ${current_digest}" >&2
+echo "Latest digest: ${latest_digest}" >&2
 
 write_output "current_digest" "$current_digest"
 write_output "latest_digest" "$latest_digest"

@@ -3,7 +3,7 @@
 # will try to infer the version from the image digest later on, but it is not guaranteed to be correct.
 
 # Do not change the FROM line format unless you also update the sync script.
-# The updater expects an exact digest-only reference on the next line.
+# The updater expects an exact digest-only reference on the next line. This broke many times!
 FROM ghcr.io/ylianst/meshcentral@sha256:f2ab9604ab75079600387d47eedbc8350dd9349fc54571d69df516d3d4b18389
 
 
