@@ -3,7 +3,7 @@
 set -euo pipefail
 
 DOCKERFILE_PATH="${1:-docker/Dockerfile}"
-BASE_IMAGE="${BASE_IMAGE:-ghcr.io/ylianst/meshcentral}"
+BASE_IMAGE="${BASE_IMAGE:-ghcr.io/ylianst/meshcentral:latest}"
 
 write_output() {
   local key="$1"
