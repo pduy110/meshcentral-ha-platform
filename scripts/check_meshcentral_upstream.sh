@@ -3,7 +3,10 @@
 set -euo pipefail
 
 DOCKERFILE_PATH="${1:-docker/Dockerfile}"
-BASE_IMAGE="${BASE_IMAGE:-ghcr.io/ylianst/meshcentral:latest}"
+BASE_IMAGE="${BASE_IMAGE:-ghcr.io/ylianst/meshcentral}"
+BASE_IMAGE_TAG="${BASE_IMAGE_TAG:-${BASE_IMAGE}:latest}"
+
+
 
 write_output() {
   local key="$1"
@@ -20,7 +23,7 @@ escaped_base_image="$(
 
 # Pin the current digest from the FROM line
 current_from_line="$(
-  awk -v prefix="FROM ${BASE_IMAGE}@" '
+  awk -v prefix="FROM ${BASE_IMAGE_TAG}@" '
     index($0, prefix) == 1 {
       print
       exit
@@ -41,7 +44,7 @@ fi
 current_digest="${current_from_line##*@}"
 
 # Find the latest digest for the base image from the registry
-inspect_output="$(docker buildx imagetools inspect "$BASE_IMAGE")"
+inspect_output="$(docker buildx imagetools inspect "$BASE_IMAGE_TAG")"
 latest_digest="$(
   printf '%s\n' "$inspect_output" | awk '
     $1 == "Digest:" {
@@ -52,7 +55,7 @@ latest_digest="$(
 )"
 
 if ! printf '%s\n' "$latest_digest" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
-  echo "Unable to determine the upstream digest for ${BASE_IMAGE}" >&2
+  echo "Unable to determine the upstream digest for ${BASE_IMAGE_TAG}" >&2
   exit 1
 fi
 

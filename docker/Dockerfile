@@ -2,8 +2,9 @@
 # MeshCentral (cant tell which version this is, latest at the time of the commit)
 # will try to infer the version from the image digest later on, but it is not guaranteed to be correct.
 
-# DO NOT WRITE ANYTHING to the FROM line, even a comment will break the parsing escaped_base_imagelogic in the script.
-FROM ghcr.io/ylianst/meshcentral:1.1.56@sha256:f2ab9604ab75079600387d47eedbc8350dd9349fc54571d69df516d3d4b18389
+# Do not change the FROM line format unless you also update the sync script.
+# The updater expects an exact digest-only reference on the next line.
+FROM ghcr.io/ylianst/meshcentral@sha256:f2ab9604ab75079600387d47eedbc8350dd9349fc54571d69df516d3d4b18389
 
 
 # Add healthcheck script
