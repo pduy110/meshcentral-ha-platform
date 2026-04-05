@@ -1,0 +1,60 @@
+server {
+    listen 80;
+    server_name ${MESH_FQDN};
+    resolver 127.0.0.11 ipv6=off valid=30s;
+
+    location = /nginx-healthz {
+        access_log off;
+        return 200 "ok\n";
+    }
+
+    location /.well-known/acme-challenge/ {
+        root ${CERTBOT_WEBROOT};
+    }
+
+    location / {
+        set $meshcentral_http_upstream http://meshcentral:800;
+        proxy_pass $meshcentral_http_upstream;
+        proxy_http_version 1.1;
+
+        # MeshCentral uses long-lived websocket connections.
+        proxy_send_timeout 330s;
+        proxy_read_timeout 330s;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host:$server_port;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name ${MESH_FQDN};
+    resolver 127.0.0.11 ipv6=off valid=30s;
+
+    # MeshCentral uses long-lived websocket connections.
+    proxy_send_timeout 330s;
+    proxy_read_timeout 330s;
+
+    ssl_certificate ${TLS_CERT_FULLCHAIN};
+    ssl_certificate_key ${TLS_CERT_PRIVKEY};
+    ssl_session_cache shared:WEBSSL:10m;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    location / {
+        set $meshcentral_https_upstream http://meshcentral:4430;
+        proxy_pass $meshcentral_https_upstream;
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host:$server_port;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

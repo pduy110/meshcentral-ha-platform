@@ -4,16 +4,17 @@
     "plugins":{
       "enabled": false
     },
-    "cert": "${SERVER_IP}",
+    "cert": "${MESH_FQDN}",
     "_WANonly": true,
     "_LANonly": true,
     "_sessionKey": "MyReallySecretPassword1",
-    "port": 80,
-    "_aliasPort": 443,
-    "redirPort": 4430,
+    "port": 4430,
+    "aliasPort": 443,
+    "redirPort": 800,
     "_redirAliasPort": 80,
     "AgentPong": 300,
-    "TLSOffload": true,
+    "TLSOffload": "${TRUSTED_PROXY}",
+    "trustedProxy": "${TRUSTED_PROXY}",
     "SelfUpdate": false,
     "AllowFraming": false,
     "WebRTC": true,
@@ -41,14 +42,14 @@
       "NewAccounts": true,
       "localSessionRecording": true,
       "_userNameIsEmail": true,
-      "_certUrl": "my.reverse.proxy",
+      "certUrl": "${CERT_URL}",
       "allowedOrigin": false
     }
   },
   "_letsencrypt": {
     "__comment__": "Requires NodeJS 8.x or better, Go to https://letsdebug.net/ first before>",
-    "_email": "myemail@mydomain.com",
-    "_names": "myserver.mydomain.com",
+    "_email": "${LETSENCRYPT_EMAIL}",
+    "_names": "${MESH_FQDN}",
     "production": false
   }
 }

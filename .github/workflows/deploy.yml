@@ -92,7 +92,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml,nginx/*,config/*,scripts/deploy.sh"
+          source: "docker-compose.yml,nginx/*,config/*,scripts/deploy.sh,scripts/render_meshcentral_config.sh,scripts/render_nginx_config.sh,scripts/bootstrap_tls.sh,scripts/renew_certs.sh"
           target: "~/meshcentral"
 
       - name: Deploy on EC2
@@ -105,10 +105,12 @@ jobs:
           script: |
             set -euo pipefail
             cd ~/meshcentral
-            chmod +x scripts/deploy.sh
+            chmod +x scripts/deploy.sh scripts/render_meshcentral_config.sh scripts/render_nginx_config.sh scripts/bootstrap_tls.sh scripts/renew_certs.sh
 
 
             IMAGE_URI="${{ needs.build.outputs.image_uri }}" \
+            MESH_FQDN="mesh.dexterpham.com" \
+            LETSENCRYPT_EMAIL="${{ secrets.LETSENCRYPT_EMAIL }}" \
             GHCR_PULL_USERNAME="${{ secrets.GHCR_PULL_USERNAME }}" \
             GHCR_PULL_TOKEN="${{ secrets.GHCR_PULL_TOKEN }}" \
             PROJECT_DIR="$HOME/meshcentral" \

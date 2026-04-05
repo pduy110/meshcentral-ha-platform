@@ -2,6 +2,9 @@
 data/
 backups/
 MYUSB/
+IGNORE/
+.certbot/
+.deploy-state/
 
 # logs
 *.log
