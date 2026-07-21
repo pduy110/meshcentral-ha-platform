@@ -4,7 +4,7 @@
 
 # Do not change the FROM line format unless you also update the sync script.
 # The updater expects an exact digest-only reference on the next line. This broke many times!
-FROM ghcr.io/ylianst/meshcentral@sha256:449926ba9d916feda942ba7bfa28c7a9ba891ee9767a78737b20a83a8cc2eb2d
+FROM ghcr.io/ylianst/meshcentral@sha256:80a80197db52eb56bc3ae3e98ccdb3d4ba9e89e4a6ed1a754bbba678daf771b9
 
 
 # Add healthcheck script
